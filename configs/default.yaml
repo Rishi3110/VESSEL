@@ -1,0 +1,74 @@
+# Default experiment: Capesize-style time-charter rate ($/day), weekly, 4 weeks ahead.
+# Swap data.source to "csv" and data.data_dir to "data/raw" once real files are in place.
+
+horizon: 4              # periods ahead (4 weeks)
+output_dir: reports
+
+data:
+  source: synthetic     # synthetic | csv
+  data_dir: data/synthetic
+  target_file: rates.csv
+  target_col: rate
+  date_col: date
+  freq: W-FRI           # weekly, Friday close (Baltic indices publish London business days)
+  max_ffill_periods: 8
+  exog:
+    - name: bunker
+      file: bunker.csv
+      publication_lag_days: 0      # Ship & Bunker / Platts: same day
+    - name: congestion
+      file: congestion.csv
+      publication_lag_days: 1
+    - name: canal
+      file: canal.csv
+      publication_lag_days: 0      # restriction announcements are public when made
+    - name: macro
+      file: macro.csv              # china_pmi, china_steel_mt (monthly, month-end stamped)
+      publication_lag_days: 15     # NBS steel output ~mid next month (PMI earlier; we use the later)
+    - name: trade
+      file: trade.csv              # iron ore / coal imports, grain exports (monthly)
+      publication_lag_days: 20     # China customs ~3 weeks after month end
+    - name: fleet
+      file: fleet.csv              # fleet, orderbook, deliveries, scrapping (monthly)
+      publication_lag_days: 10
+
+features:
+  target_lags: [1, 2, 4, 8, 13, 26, 52]
+  return_lags: [1, 2, 3]
+  rolling_windows: [4, 13, 26, 52]
+  exog_change_windows: [4, 13, 52]
+  zscore_window: 52
+  supply_col: fleet_dwt_m
+  orderbook_col: orderbook_dwt_m
+  demand_cols: [iron_ore_imports_mt, coal_imports_mt, grain_exports_mt]
+  bunker_col: bunker_usd_t
+  fuel_tpd: 35
+  calendar: true
+  day_of_week: false            # weekly data: day-of-week is constant -> useless
+  chinese_new_year: true
+  interactions:
+    - [utilization_proxy, china_pmi]
+    - [utilization_proxy, port_wait_days]
+  spike_z: 3.0
+
+split:
+  test_periods: 104     # last 2 years, touched once
+  cv_splits: 5
+  cv_test_periods: 52
+  val_periods: 26
+
+model:
+  n_trials: 40
+  max_estimators: 2000
+  early_stopping_rounds: 50
+  quantiles: [0.1, 0.5, 0.9]
+  winsorize_target: [0.01, 0.99]
+  seed: 42
+  params: {}            # fixed overrides, e.g. {max_depth: 3}
+
+decision:
+  perspective: charterer
+  threshold: 0.05
+  require_confidence: false
+  charter_days: 30
+  alert_band: true

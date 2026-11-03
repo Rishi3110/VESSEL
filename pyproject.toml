@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vessel"
+version = "0.1.0"
+description = "Dry-bulk freight rate forecasting with XGBoost: leakage-safe features, walk-forward validation, quantile forecasts and a chartering decision layer."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "scikit-learn>=1.4",
+    "xgboost>=2.0",
+    "optuna>=3.5",
+    "shap>=0.45",
+    "statsmodels>=0.14",
+    "matplotlib>=3.8",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+vessel = "vessel.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["vessel*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

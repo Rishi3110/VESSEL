@@ -1,0 +1,10 @@
+numpy>=1.26
+pandas>=2.1
+scikit-learn>=1.4
+xgboost>=2.0
+optuna>=3.5
+shap>=0.45
+statsmodels>=0.14
+matplotlib>=3.8
+pyyaml>=6.0
+pytest>=8

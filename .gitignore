@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# generated
+data/synthetic/
+reports/
+outputs/
+
+# real data is usually licensed (Baltic Exchange etc.) - keep it out of git
+data/raw/*
+!data/raw/README.md
